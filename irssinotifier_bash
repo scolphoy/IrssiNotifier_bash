@@ -1,0 +1,45 @@
+#!/bin/bash
+# Script for sending IrssiNotifier -notifiers from bash scripts.
+# Usage: notify nickname message that may consist of multiple words.
+#
+# The receiver of the notifier is determined by the api_token, so
+# it's convenient to use e.g. the name of the calling script as the nick.
+#
+
+# User configuration
+api_token=""
+encryption_password=""
+
+# Notifier parameter configuration
+channel="!PRIVATE"
+server_url="https://irssinotifier.appspot.com/API/Message"
+
+
+
+# Check for proper invocation
+if [ $# -lt 2 ]; then
+	echo Usage: $0 sender_nick message that may have multiple words; exit 1;
+fi
+
+# The encoding function. The base64 ciphertext is converted to a more URL-
+# friendly form.
+function encode() {
+	echo "$@" \
+	|openssl enc -e -aes-128-cbc -salt -base64 -A -pass env:encryption_password\
+	|sed -e 's/+/-/g' -e 's/\//_/g' -e 's/=//g';
+}
+
+# Setting the parameters for the notifier API call.
+# The encryption password needs to be exported so that OpenSSL can read the
+# environment variable. This is often safer than putting the password straight
+# on the command line.
+version=20;
+export encryption_password;
+channel=$(encode ${channel});
+nick=$(encode ${1}); shift;
+msg=$(encode ${@});
+unset encryption_password;
+
+# The actual IrssiNotifier API call.
+wget ${server_url} -q -O /dev/null \
+     --post-data=message=${msg}\&apiToken=${api_token}\&channel=${channel}\&nick=${nick}\&version=${version};
