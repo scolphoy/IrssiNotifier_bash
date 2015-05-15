@@ -22,7 +22,7 @@ fi
 
 # The encoding function. The base64 ciphertext is converted to a more URL-
 # friendly form.
-function encode() {
+function encrypt() {
 	echo "$@" \
 	|openssl enc -e -aes-128-cbc -salt -base64 -A -pass env:encryption_password\
 	|sed -e 's/+/-/g' -e 's/\//_/g' -e 's/=//g';
@@ -34,9 +34,9 @@ function encode() {
 # on the command line.
 version=20;
 export encryption_password;
-channel=$(encode ${channel});
-nick=$(encode ${1}); shift;
-msg=$(encode ${@});
+channel=$(encrypt ${channel});
+nick=$(encrypt ${1}); shift;
+msg=$(encrypt ${@});
 unset encryption_password;
 
 # The actual IrssiNotifier API call.
