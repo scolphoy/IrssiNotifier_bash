@@ -41,4 +41,5 @@ unset encryption_password;
 
 # The actual IrssiNotifier API call.
 wget ${server_url} -q -O /dev/null \
-     --post-data=message=${msg}\&apiToken=${api_token}\&channel=${channel}\&nick=${nick}\&version=${version};
+     --post-data=message=${msg}\&apiToken=${api_token}\&channel=${channel}\&nick=${nick}\&version=${version}\
+     --no-check-certificate;
